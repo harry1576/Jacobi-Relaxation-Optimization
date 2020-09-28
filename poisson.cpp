@@ -133,6 +133,7 @@ void poisson_dirichlet(double * __restrict__ source,
 	int endIndex; // End index for each core...
 	int i,n;
 	
+	
 	double* result = (double *)calloc(xsize * ysize * zsize, sizeof(*potential));
 
 
@@ -162,7 +163,7 @@ void poisson_dirichlet(double * __restrict__ source,
 		
 	}
 	
-	//free(result);
+	free(result);
 
 
 	
