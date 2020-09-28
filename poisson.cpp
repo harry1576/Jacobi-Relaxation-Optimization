@@ -1,10 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include <thread>
+#include <vector>
+#include <time.h>
 
-
-void poisson_dirichlet_func(double * __restrict__ source,
+void poisson_dirichlet_test(double * __restrict__ source,
 							double * __restrict__ potential,
 							double Vbound,
 							unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta,
@@ -53,6 +56,20 @@ void poisson_dirichlet_func(double * __restrict__ source,
 	free(input);
 }
 
+
+int calculate_index(int i, int j ,int k, int xsize, int ysize)
+{
+	return (((k * ysize) + j) * xsize + i);
+}
+
+
+void poisson_thread_function(int startIndex, int endIndex)
+{
+	
+}
+
+
+
 /// Solve Poisson's equation for a rectangular box with Dirichlet
 /// boundary conditions on each face.
 /// \param source is a pointer to a flattened 3-D array for the source function
@@ -71,16 +88,49 @@ void poisson_dirichlet (double * __restrict__ source,
                         unsigned int numiters, unsigned int numcores)
 {
     // Need equal size threads for now.
-	unsigned int size = xsize*ysize*zsize;
-	if (size % numcores) {
-		fprintf(stderr, "size %zu must be divisible by %d\n", size, numcores);
-		return 0;
-	}
+	//unsigned int size = xsize*ysize*zsize;
+	//if (size % numcores) {s
+	//	fprintf(stderr, "size %zu must be divisible by %d\n", size, numcores);
+	//	return 0;
+	//}
 	
 	// Array of threads
-	thread threads[numcores];
+	//thread threads[numcores];
 	
 	// Split up data and spawn the threads
-	for (int i = 0; i < numcores; i++) {
-		threads[i] = thread(poisson_dirichlet_func, *
+	//for (int i = 0; i < numcores; i++) {
+		//threads[i] = thread(poisson_dirichlet_func, *
+	//poisson_dirichlet_func(* __restrict__ source,  * __restrict__ potential, 0, xsize, ysize, zsize, delta, numiters, numcores);
+	
+	
+	
+	std::vector<std::thread> threads;
+	int startIndex; //Start index for each core...
+	int endIndex; // End index for each core...
+	
+	
+	// Generates threads equal to the number of cores...
+	for (unsigned int i = 0; i < numcores; ++i) {
+		startIndex = (i * xsize / numcores) + 1;
+		endIndex = (i + 1) * xsize / numcores + 1;
+		threads.push_back(std::thread(poisson_thread_function,startIndex,endIndex));
+	}
+	
+	
+	
+	
+	
+	
+	// Join threads...
+	for (auto& thread : threads) {
+			thread.join();
+	}
+	
+
+	
+	
+	
+	
 }
+
+
