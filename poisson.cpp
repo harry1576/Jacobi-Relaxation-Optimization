@@ -129,7 +129,6 @@ void poisson_dirichlet(double * __restrict__ source,
 	
 	
 	
-	std::vector<std::thread> threads;
 	int startIndex; //Start index for each core...
 	int endIndex; // End index for each core...
 	int i,n;
@@ -139,6 +138,7 @@ void poisson_dirichlet(double * __restrict__ source,
 
 	for (n = 0; n < numiters; n++) 
 	{
+		std::vector<std::thread> threads;
 
 		// Generates threads equal to the number of cores...
 		for (i = 0; i < numcores; ++i)
