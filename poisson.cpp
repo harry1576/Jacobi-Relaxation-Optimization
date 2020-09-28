@@ -7,7 +7,7 @@
 #include <vector>
 #include <time.h>
 
-void poisson_dirichlet_test(double * __restrict__ source,
+void poisson_dirichlet(double * __restrict__ source,
 							double * __restrict__ potential,
 							double Vbound,
 							unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta,
@@ -57,15 +57,39 @@ void poisson_dirichlet_test(double * __restrict__ source,
 }
 
 
-int calculate_index(int i, int j ,int k, int xsize, int ysize)
+int get_index(int i, int j ,int k, int xsize, int ysize)
 {
 	return (((k * ysize) + j) * xsize + i);
 }
 
 
-void poisson_thread_function(int startIndex, int endIndex)
+void poisson_thread_function(int startIndex, int endIndex,double * __restrict__ source, double * __restrict__ potential, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, )
 {
+	double v1,v2,v3,v4,v5,v6,deltaSquared;
+	int i,j,k,currentIndex;
 	
+	deltaSquared = delta * delta;
+	
+	for(k=startIndex; k < endIndex; k++)
+	{
+		for(j=1; j < ysize - 1; j++)
+		{
+			for(i = 1; i < xsize -1; i++)
+			{
+				v1 = potential[get_index(i+1,j,k,xsize,ysize)];
+				v2 = potential[get_index(i-1,j,k,xsize,ysize)];
+				v3 = potential[get_index(i,j+1,k,xsize,ysize)];
+				v4 = potential[get_index(i,j-1,k,xsize,ysize)];
+				v5 = potential[get_index(i,j,k-1,xsize,ysize)];
+				v6 = potential[get_index(i,j,k+1,xsize,ysize)];
+				
+				currentIndex = get_index(i,j,k,xsize,ysize);
+							
+				potential[currentIndex] = get_index(i,j,k,xsize,ysize);
+						
+			}	
+		}
+	}
 }
 
 
@@ -81,7 +105,7 @@ void poisson_thread_function(int startIndex, int endIndex)
 /// \param delta is the voxel spacing in all directions
 /// \param numiters is the number of iterations to perform
 /// \param numcores is the number of CPU cores to use.  If 0, an optimal number is chosen
-void poisson_dirichlet (double * __restrict__ source,
+void poisson_dirichlet_test (double * __restrict__ source,
                         double * __restrict__ potential,
                         double Vbound,
                         unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta,
@@ -107,29 +131,25 @@ void poisson_dirichlet (double * __restrict__ source,
 	std::vector<std::thread> threads;
 	int startIndex; //Start index for each core...
 	int endIndex; // End index for each core...
+	double* new_potential = (double *)calloc(xsize * ysize * zsize, sizeof(*potential));
 	
+	
+	printf("Hello, World!");
+
 	
 	// Generates threads equal to the number of cores...
 	for (unsigned int i = 0; i < numcores; ++i) {
 		startIndex = (i * xsize / numcores) + 1;
 		endIndex = (i + 1) * xsize / numcores + 1;
-		threads.push_back(std::thread(poisson_thread_function,startIndex,endIndex));
+		threads.push_back(std::thread(poisson_thread_function,startIndex,endIndex,source, potential, xsize, ysize, zsize, delta, result));
 	}
-	
-	
-	
-	
 	
 	
 	// Join threads...
 	for (auto& thread : threads) {
 			thread.join();
 	}
-	
 
-	
-	
-	
 	
 }
 
