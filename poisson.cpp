@@ -136,6 +136,10 @@ void poisson_dirichlet(double * __restrict__ source,
 	
 	double* result = (double *)calloc(xsize * ysize * zsize, sizeof(*potential));
 
+	if(numcores == 0){
+		numcores = 1;
+	}
+	
 
 	for (n = 0; n < numiters; n++) 
 	{
