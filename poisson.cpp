@@ -9,7 +9,6 @@
 #include <pthread.h>
 
 
-
 void poisson_dirichlet(double * __restrict__ source,
 							double * __restrict__ potential,
 							double Vbound,
@@ -122,7 +121,7 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 				res -= delta * delta * source[((z * ysize) + y) * xsize + x];
 				res /= 6;
 				potential[((z * ysize) + y) * xsize + x] = res;
-					deltaSquared
+				
 			   }
 		   }
 	   }
@@ -210,7 +209,7 @@ void poisson_dirichlet_t(double * __restrict__ source,double * __restrict__ pote
 			//printf("%f ", potential[a]);
 		//}
 	}
-	if(numiters % 2 == 0)
+	if(numiters % 2 == 1)
 	{
 		memcpy(potential,input , size);
 	}
