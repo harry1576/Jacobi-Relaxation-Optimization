@@ -10,7 +10,7 @@
 
 
 
-void poisson_dirichlet_t(double * __restrict__ source,
+void poisson_dirichlet(double * __restrict__ source,
 							double * __restrict__ potential,
 							double Vbound,
 							unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta,
@@ -19,12 +19,12 @@ void poisson_dirichlet_t(double * __restrict__ source,
 	// source[i, j, k] is accessed with source[((k * ysize) + j) * xsize + i]
     // potential[i, j, k] is accessed with potential[((k * ysize) + j) * xsize + i]    
     size_t size = (size_t)ysize * zsize * xsize * sizeof(double);
-	double *input = (double *)malloc(size);
+	double *input = (double *)calloc(size, 1);
 	if (!input) {
 		fprintf(stderr, "malloc failure\n");
 		return;
 	}
-	memcpy(input, source, size);
+	//memcpy(input, source, size);
 	for (unsigned int iter = 0; iter < numiters; iter++) {
 		for (unsigned int x = 0; x < xsize; x++) {
 			for (unsigned int z = 0; z < zsize; z++) {
@@ -54,6 +54,7 @@ void poisson_dirichlet_t(double * __restrict__ source,
 				}
 			}
 		}
+		//potential = input;
 		memcpy(input, potential, size);
 	}
 	free(input);
@@ -70,26 +71,7 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 {
 	int x, y, z;
 	double res;
-	
-	/*
-	for (z = 1; z < zsize-1; z++) {
-		for (y = 1; y < ysize-1; y++) {
-			for (x = start_index+1; x < end_index-1; x++) {
-				printf("entered");
-				res = 0;
-				res += input[((z * ysize) + y) * xsize + (x + 1)];
-				res += input[((z * ysize) + y) * xsize + (x - 1)];
-				res += input[((z * ysize) + (y + 1)) * xsize + x];
-				res += input[((z * ysize) + (y - 1)) * xsize + x];
-				res += input[(((z + 1) * ysize) + y) * xsize + x];
-				res += input[(((z - 1) * ysize) + y) * xsize + x];
-				res -= delta * delta * source[((z * ysize) + y) * xsize + x];
-				res /= 6;
-				potential[((z * ysize) + y) * xsize + x] = res;
-				
-			   }
-			}
-		} */
+	double deltaSquared = (delta * delta);
 	
 	for (z = start_index; z < end_index; z++) {
 	  for (y = 0; y < ysize; y++) {
@@ -99,14 +81,12 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 									
 				if (x < xsize - 1){
 					res += input[((z * ysize) + y) * xsize + (x + 1)];
-					//printf("X < XSize - 1 \n");
 					}
 				else
 					res += Vbound;
 					
 				if (x > 0){
 					res += input[((z * ysize) + y) * xsize + (x - 1)];
-					//printf("X > 0 \n");
 					}
 
 				else
@@ -114,7 +94,6 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 
 				if (y < ysize - 1){
 					res += input[((z * ysize) + (y + 1)) * xsize + x];
-					//printf("Y < YSize - 1 \n");
 					}
 
 				else
@@ -123,7 +102,6 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 					
 				if (y > 0){
 					res += input[((z * ysize) + (y - 1)) * xsize + x];
-					//printf("Y > 0 \n");
 					}
 
 				else
@@ -131,103 +109,45 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 
 				if (z < zsize - 1){
 					res += input[(((z + 1) * ysize) + y) * xsize + x];
-					//printf("Z < ZSize - 1 \n");
 					}
 				else
 					res += Vbound;
 				
 				if (z > 0){
 					res += input[(((z - 1) * ysize) + y) * xsize + x];					
-					//printf("Z > 0 \n");
 					}
 				else
 					res += Vbound;
 
-				
 				res -= delta * delta * source[((z * ysize) + y) * xsize + x];
 				res /= 6;
 				potential[((z * ysize) + y) * xsize + x] = res;
-				
-				
-				
-					/*
-				printf("entered");
-
-				if(x <= 0 or x >= xsize -1)
-				{
-					res += Vbound;
-				}
-				
-				if(y <= 0 or y >= ysize -1)
-				{
-					res += Vbound;
-				}
-				
-				if(z <= 0 or z >= zsize -1)
-				{
-					res += Vbound;
-				} delta * delta
-				*/
-				/*			
-				printf("entered");
-start_index
-				if(x <= 0)
-				{
-					res += Vbound;
-				}
-				
-				if(x >= xsize -1)
-				{
-					res += Vbound;
-				}
-				
-				if(y <= 0)
-				{
-					res += Vbound;
-				}
-				if(y >= ysize -1)
-				{
-					res += Vbound;
-				}
-				
-				if(z <= 0)
-				{
-					res += Vbound;
-				}
-				start_index
-				if(z >= zsize -1)
-				{
-					res += Vbound;
-				}
-				*/
-				
-				
+					deltaSquared
 			   }
 		   }
 	   }
-	   
- 
 }
 
 
 
 
-/// Solve Poisson's equation for a rectangular box with Dirichlet
+/// Solve Poisson's equationinput for a rectangular box with Dirichlet
 /// boundary conditions on each face.
 /// \param source is a pointer to a flattened 3-D array for the source function
 /// \param potential is a pointer to a flattened 3-D array for the calculated potential
-/// \param Vbound is the potential on the boundary
+/// \param Vbound is the potentipotential = input;al on the boundary
 /// \param xsize is the number of elements in the x-direction
 /// \param ysize is the number of elements in the y-direction
 /// \param zsize is the number of elements in the z-direction
-/// \param delta is the voxel spacing in all directions
+/// \param delta is the voxeinputl spacing in all directions
 /// \param numiters is the number of iterations to perform
 /// \param numcores is the number of CPU cores to use.  If 0, an optimal number is chosen
-void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, unsigned int numiters, unsigned int numcores)
+void poisson_dirichlet_t(double * __restrict__ source,double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, unsigned int numiters, unsigned int numcores)
 {
 	
 	size_t size = (size_t)ysize * zsize * xsize * sizeof(double);
-	double *input = (double *)malloc(size);
+	double *input = (double *)calloc(xsize * ysize * zsize, sizeof(*potential));
+	double *temp = (double *)calloc(xsize * ysize * zsize, sizeof(*potential));
 	if (!input) {
 		fprintf(stderr, "malloc failure\n");
 		return;
@@ -237,7 +157,7 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 	int end_index; // End index for each core...
 	int i,n;
 	
-	memcpy(input, source, size);
+	//memcpy(input, source, size);
 
 	if(numcores == 0){
 		numcores = 1;
@@ -249,7 +169,7 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 	for (n = 0; n < numiters; n++) 
 	{
 		
-		for(i = 0; i < numcores; i++)
+		for(i = 0; i < numcores; i++) // added threading
 		{	
 
 			start_index = (i * xsize / numcores);
@@ -257,17 +177,46 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 			threads.push_back(std::thread(poisson_thread_function,start_index,end_index,source, potential, 0, xsize, ysize, zsize, delta, input));
 		
 		}
-		
+
 		for (std::thread & th : threads)
 		{
 			if (th.joinable())
 				th.join();
 		}
 		
-		memcpy(input, potential, size);
+		// me
+		temp = input;
+		input = potential;
+		potential = temp;
+		
+		// ben
+		//temp = potential;
+		//potential = input;
+		//input = temp;
+		
+		//for (int a = 0; a < 20; a++) {
+		//	printf("%f ", input[a]);
+		//}
+
+		//temp = potential;
+		//input = temp;
+		//potential = input;
+		//input = temp;
+		
+
+
+//		memcpy(input, potential, size); //-> removed mem copy -> more effecieny
+		//for (int a = 0; a < 20; a++) {
+			//printf("%f ", potential[a]);
+		//}
+	}
+	if(numiters % 2 == 0)
+	{
+		memcpy(potential,input , size);
 	}
 	
-	free(input);
+	//free(input);
+	//free(potential);
 }
 	
 

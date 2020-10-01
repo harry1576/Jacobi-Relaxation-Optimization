@@ -42,8 +42,15 @@ int main (int argc, char *argv[])
     
     poisson_dirichlet(source, potential, 0, xsize, ysize, zsize, delta,numiters, numcores);
     
-	for (int i = 0; i < xsize*ysize*zsize; i++) {             
-		printf("%f ", potential[i]);
+	//for (int i = 0; i < xsize*ysize*zsize; i++) {             
+	for (int z = 0; z < zsize; ++z) {
+		for (int y = 0; y < ysize; ++y) {
+			for (int x = 0; x < xsize; ++x) {
+				printf("%f ", potential[((z * ysize) + y) * xsize + x]);
+			}
+			printf("\n");
+		}
+		printf("\n\n");
 	}
 
     
