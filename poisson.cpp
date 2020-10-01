@@ -68,62 +68,14 @@ int get_index(int i, int j ,int k, int xsize, int ysize)
 
 void poisson_thread_function(int start_index, int end_index,double * __restrict__ source, double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, double * input)
 {
-	unsigned int x, y, z;
+	int x, y, z;
 	double res;
 	
-
-	   
-	  for (z = 0; z < zsize; z++) {
-		for (y = 0; y < ysize; y++) {
-			for (x = start_index ; x < end_index; x+= xsize-1) {
-				
-				res = 0;
-				
-				if (x < xsize - 1)
-					res += input[((z * ysize) + y) * xsize + (x + 1)];
-				else
-					printf("entered last one");
-					res += Vbound;
-					
-				if (x > 0)
-					res += input[((z * ysize) + y) * xsize + (x - 1)];
-				else
-					res += Vbound;
-
-				if (y < ysize - 1)
-					res += input[((z * ysize) + (y + 1)) * xsize + x];
-				else
-					res += Vbound;
-					
-				if (y > 0)
-					res += input[((z * ysize) + (y - 1)) * xsize + x];
-				else
-					res += Vbound;
-
-				if (z < zsize - 1)
-					res += input[(((z + 1) * ysize) + y) * xsize + x];
-				else
-					res += Vbound;
-				
-				if (z > 0)
-					res += input[(((z - 1) * ysize) + y) * xsize + x];
-				else
-					res += Vbound;
-
-				res -= delta * delta * source[((z * ysize) + y) * xsize + x];
-				res /= 6;
-				potential[((z * ysize) + y) * xsize + x] = res;
-				
-			   }
-		   }
-	   }
-	   
-	   
-	   
-	   for (z = 1; z < zsize-1; z++) {
+	/*
+	for (z = 1; z < zsize-1; z++) {
 		for (y = 1; y < ysize-1; y++) {
 			for (x = start_index+1; x < end_index-1; x++) {
-				//printf("entered");
+				printf("entered");
 				res = 0;
 				res += input[((z * ysize) + y) * xsize + (x + 1)];
 				res += input[((z * ysize) + y) * xsize + (x - 1)];
@@ -136,8 +88,125 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 				potential[((z * ysize) + y) * xsize + x] = res;
 				
 			   }
+			}
+		} */
+	
+	for (z = start_index; z < end_index; z++) {
+	  for (y = 0; y < ysize; y++) {
+		for (x = 0; x < xsize; x++) {
+				
+				res = 0;
+									
+				if (x < xsize - 1){
+					res += input[((z * ysize) + y) * xsize + (x + 1)];
+					//printf("X < XSize - 1 \n");
+					}
+				else
+					res += Vbound;
+					
+				if (x > 0){
+					res += input[((z * ysize) + y) * xsize + (x - 1)];
+					//printf("X > 0 \n");
+					}
+
+				else
+					res += Vbound;
+
+				if (y < ysize - 1){
+					res += input[((z * ysize) + (y + 1)) * xsize + x];
+					//printf("Y < YSize - 1 \n");
+					}
+
+				else
+					res += Vbound;
+
+					
+				if (y > 0){
+					res += input[((z * ysize) + (y - 1)) * xsize + x];
+					//printf("Y > 0 \n");
+					}
+
+				else
+					res += Vbound;
+
+				if (z < zsize - 1){
+					res += input[(((z + 1) * ysize) + y) * xsize + x];
+					//printf("Z < ZSize - 1 \n");
+					}
+				else
+					res += Vbound;
+				
+				if (z > 0){
+					res += input[(((z - 1) * ysize) + y) * xsize + x];					
+					//printf("Z > 0 \n");
+					}
+				else
+					res += Vbound;
+
+				
+				res -= delta * delta * source[((z * ysize) + y) * xsize + x];
+				res /= 6;
+				potential[((z * ysize) + y) * xsize + x] = res;
+				
+				
+				
+					/*
+				printf("entered");
+
+				if(x <= 0 or x >= xsize -1)
+				{
+					res += Vbound;
+				}
+				
+				if(y <= 0 or y >= ysize -1)
+				{
+					res += Vbound;
+				}
+				
+				if(z <= 0 or z >= zsize -1)
+				{
+					res += Vbound;
+				} delta * delta
+				*/
+				/*			
+				printf("entered");
+start_index
+				if(x <= 0)
+				{
+					res += Vbound;
+				}
+				
+				if(x >= xsize -1)
+				{
+					res += Vbound;
+				}
+				
+				if(y <= 0)
+				{
+					res += Vbound;
+				}
+				if(y >= ysize -1)
+				{
+					res += Vbound;
+				}
+				
+				if(z <= 0)
+				{
+					res += Vbound;
+				}
+				start_index
+				if(z >= zsize -1)
+				{
+					res += Vbound;
+				}
+				*/
+				
+				
+			   }
 		   }
-	   }  
+	   }
+	   
+ 
 }
 
 
