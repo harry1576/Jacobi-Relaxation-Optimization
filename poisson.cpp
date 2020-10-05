@@ -8,8 +8,8 @@
 #include <time.h>
 #include <pthread.h>
 
-/*
-void poisson_dirichlet(double * __restrict__ source,
+
+void poisson_dirichlet_t(double * __restrict__ source,
 							double * __restrict__ potential,
 							double Vbound,
 							unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta,
@@ -57,7 +57,7 @@ void poisson_dirichlet(double * __restrict__ source,
 		memcpy(input, potential, size);
 	}
 	free(input);
-}*/
+}
 
 
 void poisson_thread_function(int start_index, int end_index,double * __restrict__ source, double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, double * input)
@@ -155,16 +155,17 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 	if(numcores == 0){
 		numcores = 1;
 	}
+	//numcores = 4;
 	
 	std::vector<std::thread> threads;
 
 	
 	for (n = 0; n < numiters; n++) 
 	{
+		//printf("%d", numcores);
 		
 		for(i = 0; i < numcores; i++) // added threading
 		{	
-
 			start_index = (i * xsize / numcores);
 			end_index = (i + 1) * xsize / numcores ;
 			threads.push_back(std::thread(poisson_thread_function,start_index,end_index,source, potential, 0, xsize, ysize, zsize, delta, input));
@@ -206,16 +207,18 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 	if(numiters % 2 == 0)
 	{
 		memcpy(potential,input , size);
+		//free(temp);
+		//free(potential);
 	}
+
+	//free(temp);
+	//free(potential);
+	free(input);
+	free(temp);
+	
 	
 	//free(input);
 	//free(potential);
 }
 	
-
-
-
-
-	
-
 
