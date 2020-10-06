@@ -66,7 +66,7 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 	double res;
 	double deltaSquared = (delta * delta);
 	
-	for (z = start_index; z < end_index; z++) {
+	for (z = start_index; z <  zsize; z+=end_index) {
 	  for (y = 0; y < ysize; y++) {
 		for (x = 0; x < xsize; x++) {
 				
@@ -155,19 +155,18 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 	if(numcores == 0){
 		numcores = 1;
 	}
-	//numcores = 4;
 	
 	std::vector<std::thread> threads;
 
 	
 	for (n = 0; n < numiters; n++) 
 	{
-		//printf("%d", numcores);
 		
 		for(i = 0; i < numcores; i++) // added threading
 		{	
-			start_index = (i * xsize / numcores);
-			end_index = (i + 1) * xsize / numcores ;
+
+			start_index = i;
+			end_index =   numcores ;
 			threads.push_back(std::thread(poisson_thread_function,start_index,end_index,source, potential, 0, xsize, ysize, zsize, delta, input));
 		
 		}
@@ -209,16 +208,24 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 		memcpy(potential,input , size);
 		//free(temp);
 		//free(potential);
-	}
+		free(input);
 
-	//free(temp);
-	//free(potential);
-	free(input);
-	free(temp);
-	
+	}
+	else
+	{
+		//free(temp);
+		//free(potential);
+		free(input);
+	}
 	
 	//free(input);
 	//free(potential);
 }
 	
+
+
+
+
+	
+
 
