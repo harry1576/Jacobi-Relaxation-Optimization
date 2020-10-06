@@ -69,9 +69,8 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 	for (z = start_index; z <  zsize; z+=end_index) {
 	  for (y = 0; y < ysize; y++) {
 		for (x = 0; x < xsize; x++) {
-				
-				res = 0;
-									
+
+				res = 0;					
 				if (x < xsize - 1){
 					res += input[((z * ysize) + y) * xsize + (x + 1)];
 					}
