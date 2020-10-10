@@ -53,11 +53,9 @@ int main (int argc, char *argv[])
 	nanoseconds = (end.tv_sec - start.tv_sec) * 1000000000ULL + (end.tv_nsec - start.tv_nsec);
 	printf("Took %" PRIu64 " ms for %zu iterations at size %d and cores %d \n",nanoseconds / 1000000, numiters,N,numcores);
 	
-	
+	/* USEFUL FOR TESTING PURPOSES
 	FILE *fp;
 	fp = fopen("100 Legit.txt", "w");
-
-	
 	for (int z = 0; z < zsize; ++z) {
 		for (int y = 0; y < ysize; ++y) {
 			for (int x = 0; x < xsize; ++x) {
@@ -69,7 +67,7 @@ int main (int argc, char *argv[])
 	
 	
 	fclose(fp); //Don't forget to close the file when finished
-	
+	*/
 	free(source);
 	free(potential);
 
