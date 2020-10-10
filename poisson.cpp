@@ -197,7 +197,7 @@ void poisson_dirichletx(double * __restrict__ source,double * __restrict__ poten
 		input = potential;
 		potential = temp;	
 	}
-	//free(input);
+	//free(input);//
 
 	if(numiters % 2 == 0)
 	{
