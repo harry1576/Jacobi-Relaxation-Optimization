@@ -20,6 +20,10 @@
  * 
  */
 
+// PLEASE NOTE THE PROVIDED IMPLEMENTATION HAS BEEN ADJUSTED TO USE CALLOC
+// THE OUTPUTS OF THE NAIVE AND NEW IMPLEMENTATION HAVE BEEN CROSSED CHECKED
+// TO ENSURE EXACT OUTPUTS.
+
 
 void naive_poisson_dirichlet(double * __restrict__ source,
 							double * __restrict__ potential,
@@ -82,7 +86,7 @@ void naive_poisson_dirichlet(double * __restrict__ source,
 	}
 	free(input);
 }
-//
+
 
 void poisson_thread_function(int start_index, int increment,double * __restrict__ source, double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, double * input)
 {
