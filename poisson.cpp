@@ -7,9 +7,10 @@
 #include <vector>
 #include <time.h>
 #include <pthread.h>
-
-
-void poisson_dirichlet_t(double * __restrict__ source,
+#include <iostream>
+//
+//////
+void poisson_dirichlet(double * __restrict__ source,
 							double * __restrict__ potential,
 							double Vbound,
 							unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta,
@@ -28,28 +29,42 @@ void poisson_dirichlet_t(double * __restrict__ source,
 		for (unsigned int x = 0; x < xsize; x++) {
 			for (unsigned int z = 0; z < zsize; z++) { 
 				for (unsigned int y = 0; y < ysize; y++) {
+
 					double res = 0;
 
 					if (x < xsize - 1)
 						res += input[((z * ysize) + y) * xsize + (x + 1)];
+					else
+						res += Vbound;
 					if (x > 0)
 						res += input[((z * ysize) + y) * xsize + (x - 1)];
+					else
+						res += Vbound;
 
 					if (y < ysize - 1)
 						res += input[((z * ysize) + (y + 1)) * xsize + x];
+					else
+						res += Vbound;
 					if (y > 0)
 						res += input[((z * ysize) + (y - 1)) * xsize + x];
+					else
+						res += Vbound;
 
 					if (z < zsize - 1)
 						res += input[(((z + 1) * ysize) + y) * xsize + x];
+					else
+						res += Vbound;
 					if (z > 0)
 						res += input[(((z - 1) * ysize) + y) * xsize + x];
+					else
+						res += Vbound;
 
 					res -= delta * delta * source[((z * ysize) + y) * xsize + x];
 
 					res /= 6;
 
 					potential[((z * ysize) + y) * xsize + x] = res;
+
 				}
 			}
 		}
@@ -58,15 +73,15 @@ void poisson_dirichlet_t(double * __restrict__ source,
 	}
 	free(input);
 }
+//
 
-
-void poisson_thread_function(int start_index, int end_index,double * __restrict__ source, double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, double * input)
+void poisson_thread_function(int start_index, int increment,double * __restrict__ source, double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, double * input)
 {
 	int x, y, z;
 	double res;
 	double deltaSquared = (delta * delta);
 	
-	for (z = start_index; z <  zsize; z+=end_index) {
+	for (z = start_index; z <  zsize; z+=increment) {
 	  for (y = 0; y < ysize; y++) {
 		for (x = 0; x < xsize; x++) {
 
@@ -134,7 +149,7 @@ void poisson_thread_function(int start_index, int end_index,double * __restrict_
 /// \param delta is the voxeinputl spacing in all directions
 /// \param numiters is the number of iterations to perform
 /// \param numcores is the number of CPU cores to use.  If 0, an optimal number is chosen
-void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, unsigned int numiters, unsigned int numcores)
+void poisson_dirichletx(double * __restrict__ source,double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, unsigned int numiters, unsigned int numcores)
 {
 	
 	size_t size = (size_t)ysize * zsize * xsize * sizeof(double);
@@ -146,7 +161,7 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 	}
 	
 	int start_index; //Start index for each core...
-	int end_index; // End index for each core...
+	int increment; // End index for each core...
 	int i,n;
 	
 	//memcpy(input, source, size);
@@ -163,62 +178,37 @@ void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potent
 		
 		for(i = 0; i < numcores; i++) // added threading
 		{	
-
 			start_index = i;
-			end_index =   numcores ;
-			threads.push_back(std::thread(poisson_thread_function,start_index,end_index,source, potential, 0, xsize, ysize, zsize, delta, input));
-		
+			increment =   numcores ;
+			threads.push_back(std::thread(poisson_thread_function,start_index,increment,source, potential, Vbound, xsize, ysize, zsize, delta, input));
 		}
-
+		
 		for (std::thread & th : threads)
 		{
 			if (th.joinable())
+			{
 				th.join();
+			} 
 		}
+		//memcpy(potential,input , size);
+	
 		
-		// me
 		temp = input;
 		input = potential;
-		potential = temp;
-		
-		// ben
-		//temp = potential;
-		//potential = input;
-		//input = temp;
-		
-		//for (int a = 0; a < 20; a++) {
-		//	printf("%f ", input[a]);
-		//}
-
-		//temp = potential;
-		//input = temp;
-		//potential = input;
-		//input = temp;
-		
-
-
-//		memcpy(input, potential, size); //-> removed mem copy -> more effecieny
-		//for (int a = 0; a < 20; a++) {
-			//printf("%f ", potential[a]);
-		//}
+		potential = temp;	
 	}
+	//free(input);
+
 	if(numiters % 2 == 0)
 	{
 		memcpy(potential,input , size);
-		//free(temp);
-		//free(potential);
 		free(input);
-
 	}
 	else
 	{
-		//free(temp);
-		//free(potential);
 		free(input);
 	}
 	
-	//free(input);
-	//free(potential);
 }
 	
 

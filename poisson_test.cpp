@@ -49,23 +49,33 @@ int main (int argc, char *argv[])
 
     source[((zsize / 2 * ysize) + ysize / 2) * xsize + xsize / 2] = 1.0;    
     clock_gettime(CLOCK_MONOTONIC, &start);
-    poisson_dirichlet(source, potential, 0, xsize, ysize, zsize, delta,numiters, numcores);
+    poisson_dirichlet(source, potential, 0.5, xsize, ysize, zsize, delta,numiters, numcores);
     clock_gettime(CLOCK_MONOTONIC, &end);
 	nanoseconds = (end.tv_sec - start.tv_sec) * 1000000000ULL + (end.tv_nsec - start.tv_nsec);
 	printf("Took %" PRIu64 " ms for %zu iterations at size %d and cores %d \n",nanoseconds / 1000000, numiters,N,numcores);
-		
-	/*for (int z = 0; z < zsize; ++z) {
-	for (int y = 0; y < ysize; ++y) {
+	
+	
+	FILE *fp;
+	fp = fopen("700 Final.txt", "w");
+
+	
+	for (int z = 0; z < zsize; ++z) {
+		for (int y = 0; y < ysize; ++y) {
 			for (int x = 0; x < xsize; ++x) {
-				printf("%f ", potential[((z * ysize) + y) * xsize + x]);
+				fprintf(fp,"%.10f", potential[((z * ysize) + y) * xsize + x]);
+				//printf("%f ", potential[((z * ysize) + y) * xsize + x]);
 			}
-			printf("\n");
+			//printf("\n");//
 		}
-		printf("\n\n");
-	}*/
+		printf("printing....\n");
+	}
+	
+	
+	//fprintf(fp, potential);
+	fclose(fp); //Don't forget to close the file when finished
 	
 	free(source);
-	//free(potential);
+	free(potential);
 
     
 
