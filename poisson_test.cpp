@@ -1,6 +1,6 @@
 
 /// \brief Test program for solving Poisson's equation using Jacobi relaxation
-/// \author M. P. Hayes UCECE
+/// \author M. P. Hayes UCECE and Harry Dobbs
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,7 +8,6 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <inttypes.h>
-
 
 
 int main (int argc, char *argv[])
@@ -56,22 +55,19 @@ int main (int argc, char *argv[])
 	
 	
 	FILE *fp;
-	fp = fopen("700 Final.txt", "w");
+	fp = fopen("100 Legit.txt", "w");
 
 	
 	for (int z = 0; z < zsize; ++z) {
 		for (int y = 0; y < ysize; ++y) {
 			for (int x = 0; x < xsize; ++x) {
 				fprintf(fp,"%.10f", potential[((z * ysize) + y) * xsize + x]);
-				//printf("%f ", potential[((z * ysize) + y) * xsize + x]);
 			}
-			//printf("\n");//
 		}
-		printf("printing....\n");
+		printf("%f % \n",z);
 	}
 	
 	
-	//fprintf(fp, potential);
 	fclose(fp); //Don't forget to close the file when finished
 	
 	free(source);

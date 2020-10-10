@@ -8,9 +8,20 @@
 #include <time.h>
 #include <pthread.h>
 #include <iostream>
-//
-//////
-void poisson_dirichlet(double * __restrict__ source,
+
+/*
+ * poisson.cpp - contains the inital naive_poisson_dirichelt
+ * aswell as an optimized function poisson_dirichelt, that utilizes
+ * threading, and indexing to maximize caches. 
+ * 
+ * Authors: Harry Dobbs & Joshua Hulbert
+ * 
+ * Date: 10th October 2020
+ * 
+ */
+
+
+void naive_poisson_dirichlet(double * __restrict__ source,
 							double * __restrict__ potential,
 							double Vbound,
 							unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta,
@@ -24,7 +35,6 @@ void poisson_dirichlet(double * __restrict__ source,
 		fprintf(stderr, "malloc failure\n");
 		return;
 	}
-	//memcpy(input, source, size);
 	for (unsigned int iter = 0; iter < numiters; iter++) {
 		for (unsigned int x = 0; x < xsize; x++) {
 			for (unsigned int z = 0; z < zsize; z++) { 
@@ -68,7 +78,6 @@ void poisson_dirichlet(double * __restrict__ source,
 				}
 			}
 		}
-		//potential = input;
 		memcpy(input, potential, size);
 	}
 	free(input);
@@ -79,7 +88,6 @@ void poisson_thread_function(int start_index, int increment,double * __restrict_
 {
 	int x, y, z;
 	double res;
-	double deltaSquared = (delta * delta);
 	
 	for (z = start_index; z <  zsize; z+=increment) {
 	  for (y = 0; y < ysize; y++) {
@@ -149,7 +157,7 @@ void poisson_thread_function(int start_index, int increment,double * __restrict_
 /// \param delta is the voxeinputl spacing in all directions
 /// \param numiters is the number of iterations to perform
 /// \param numcores is the number of CPU cores to use.  If 0, an optimal number is chosen
-void poisson_dirichletx(double * __restrict__ source,double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, unsigned int numiters, unsigned int numcores)
+void poisson_dirichlet(double * __restrict__ source,double * __restrict__ potential, double Vbound, unsigned int xsize, unsigned int ysize, unsigned int zsize, double delta, unsigned int numiters, unsigned int numcores)
 {
 	
 	size_t size = (size_t)ysize * zsize * xsize * sizeof(double);
@@ -164,8 +172,6 @@ void poisson_dirichletx(double * __restrict__ source,double * __restrict__ poten
 	int increment; // End index for each core...
 	int i,n;
 	
-	//memcpy(input, source, size);
-
 	if(numcores == 0){
 		numcores = 1;
 	}
@@ -176,7 +182,7 @@ void poisson_dirichletx(double * __restrict__ source,double * __restrict__ poten
 	for (n = 0; n < numiters; n++) 
 	{
 		
-		for(i = 0; i < numcores; i++) // added threading
+		for(i = 0; i < numcores; i++)
 		{	
 			start_index = i;
 			increment =   numcores ;
@@ -190,14 +196,12 @@ void poisson_dirichletx(double * __restrict__ source,double * __restrict__ poten
 				th.join();
 			} 
 		}
-		//memcpy(potential,input , size);
 	
 		
 		temp = input;
 		input = potential;
 		potential = temp;	
 	}
-	//free(input);//
 
 	if(numiters % 2 == 0)
 	{
